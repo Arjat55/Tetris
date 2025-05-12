@@ -21,7 +21,9 @@ namespace Tetris_VersionChingona
 
         internal Escenario Escenario { get => escenario; set => escenario = value; }
 
-
+        /// <summary>
+        /// Cuando se inicializa el tetris, se crea el escenario también
+        /// </summary>
         public Tetris() //Que tetris mas chingon
         {
             escenario = new Escenario();
@@ -53,6 +55,9 @@ namespace Tetris_VersionChingona
         }
 
         //HACER MENOS PERUANO
+        /// <summary>
+        /// Método para iniciar el juego
+        /// </summary>
         public void jugar()
         {
             /*while (true)
@@ -160,13 +165,21 @@ namespace Tetris_VersionChingona
         }
 
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void leerInput()
         {
             input = Console.ReadKey().Key;
             inputLeido = true;
         }
 
-
+        /// <summary>
+        /// Método sobrecargado que se encarga de
+        /// esperar para que la pieza caiga hasta que
+        /// se pase el tiempo o se reciba un input
+        /// </summary>
+        /// <param name="mili">Tiempo a esperar</param>
         public void leerInput(int mili)
         {
             Stopwatch cronometro = new Stopwatch();
