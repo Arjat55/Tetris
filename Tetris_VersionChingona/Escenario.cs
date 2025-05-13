@@ -88,9 +88,8 @@ namespace Tetris_VersionChingona
                     case ConsoleKey.DownArrow:
                     case ConsoleKey.S:
                     case ConsoleKey.Enter:
-                        if (comprobarCaer()) return true;
-
-                        else return false;
+                        if (!comprobarCaer()) return false;
+                        break;
 
                     case ConsoleKey.Spacebar:
                         return true;

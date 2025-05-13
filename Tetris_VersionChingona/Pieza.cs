@@ -246,8 +246,14 @@ namespace Tetris_VersionChingona
                     }
 
                 }
-                escenario[item.Y][item.X] = item;
+                
 
+            }
+            Console.WriteLine("La altura del escenario es: " + (escenario.Length - 1) + " y el ancho es: " + (escenario[1].Length - 1));
+            comprobarRotar(escenario.Length - 1, escenario[1].Length - 1);
+            foreach (var item in casillas)
+            {                
+                escenario[item.Y][item.X] = item;
             }
 
             Console.WriteLine(contador);
@@ -255,23 +261,91 @@ namespace Tetris_VersionChingona
 
         }
 
-        public void comprobarRotar(Casilla[][] escenario) // falta try-catch
+        public void comprobarRotar(int altura, int ancho) // falta try-catch
         {
+            int distanciaX = 0;
+            int distanciaY = 0;
+            int opcionX = 0;
+            int opcionY = 0;
+
             foreach (var item in casillas)
             {
+                int distancia = 0;
                 int x = item.X;
                 int y = item.Y;
 
-                if (y >= escenario.Length || y < 0)
+                if (altura < y)
                 {
-                    if (y >= escenario.Length)
-                    {
-                        if (true)
-                        {
-                            
-                        }
-                    }
+                    distancia = y - altura;
+                    if (distancia >= distanciaY) distanciaY = distancia;
+                    opcionY = 1;
                 }
+                else if (y < 0)
+                {
+                    distancia = 0 - y;
+                    if (distancia >= distanciaY) distanciaY = distancia;
+                    opcionX = 2;
+                }
+                if (ancho < x)
+                {
+                    distancia = x - ancho;
+                    if(distancia >= distanciaX) distanciaX = distancia;
+                    opcionX = 1;
+                }
+                else if (x < 0)
+                {
+                    distancia = 0 - x;
+                    if (distancia >= distanciaX) distanciaX = distancia;
+                    opcionX = 2;
+                }
+                
+            }
+
+            Console.WriteLine("Distancias: " + distanciaX + " " + distanciaY);
+            if (distanciaX == 0 && distanciaY == 0) return;
+
+            for (int i = 0; i < distanciaY; i++)
+            {
+                if (opcionY == 1) bajar();
+                else subir();
+            }
+
+            for (int i = 0; i < distanciaX; i++)
+            {
+                if (opcionX == 1) moverIzquierda();
+                else moverDerecha();
+            }
+        }
+
+        public void bajar()
+        {
+            foreach (var casilla in casillas)
+            {
+                casilla.Y--;
+            }
+        }
+
+        public void subir()
+        {
+            foreach (var casilla in casillas)
+            {
+                casilla.Y++;
+            }
+        }
+
+        public void moverDerecha()
+        {
+            foreach (var casilla in casillas)
+            {
+                casilla.X++;
+            }
+        }
+
+        public void moverIzquierda()
+        {
+            foreach (var casilla in casillas)
+            {
+                casilla.X--;
             }
         }
 
