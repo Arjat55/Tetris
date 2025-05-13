@@ -75,11 +75,13 @@ namespace Tetris_VersionChingona
                     case ConsoleKey.LeftArrow:
                     case ConsoleKey.A:
                         if (item.X == 0) return false;
+                        if (escenario[item.Y][item.X - 1].Ocupado) return false;
                         break;
 
                     case ConsoleKey.RightArrow:
                     case ConsoleKey.D:
                         if (item.X == ancho - 1) return false;
+                        if (escenario[item.Y][item.X + 1].Ocupado) return false;
                         break;
 
 

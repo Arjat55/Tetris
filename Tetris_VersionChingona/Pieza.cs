@@ -166,7 +166,7 @@ namespace Tetris_VersionChingona
 
         }       
 
-        public void rotar(Casilla[][] escenario)
+        public void rotar(Casilla[][] escenario) // métele try catch pa rotar en los bordes yya
         {
             if (tipoPieza == TipoPieza.CUBO) return;
 
@@ -255,7 +255,7 @@ namespace Tetris_VersionChingona
 
         }
 
-        public void comprobarRotar(Casilla[][] escenario)
+        public void comprobarRotar(Casilla[][] escenario) // falta try-catch
         {
             foreach (var item in casillas)
             {
@@ -287,7 +287,7 @@ namespace Tetris_VersionChingona
             CUBO
         }
 
-        public enum Movimiento
+        public enum Movimiento //duro este enum la verdad 
         { 
             DERECHA,
             IZQUIERDA,
