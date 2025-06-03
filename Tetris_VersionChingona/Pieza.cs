@@ -170,18 +170,24 @@ namespace Tetris_VersionChingona
         {
             if (tipoPieza == TipoPieza.CUBO) return;
 
+            int contador = 0;
+
+            Casilla[] posInicial = new Casilla[4];
+
             foreach (var item in casillas)
             {
                 int x = item.X;
                 int y = item.Y;
                 escenario[y][x] = new Casilla(x, y);
+                posInicial[contador] = new Casilla(x, y);
+                contador++;
             }
 
             int XMedio = medio.X;
             int YMedio = medio.Y;
 
-            int contador = 0;
-            Casilla[] posInicial = new Casilla[3];
+            
+            
 
             foreach (var item in casillas)
             {
@@ -191,8 +197,7 @@ namespace Tetris_VersionChingona
                 if (item != medio)
                 {
                     int x = item.X;
-                    int y = item.Y;
-                    posInicial[contador] = new Casilla(x, y);
+                    int y = item.Y;                    
 
                     if (item.Y == YMedio)
                     {
@@ -251,13 +256,24 @@ namespace Tetris_VersionChingona
             }
             Console.WriteLine("La altura del escenario es: " + (escenario.Length - 1) + " y el ancho es: " + (escenario[1].Length - 1));
             comprobarRotar(escenario.Length - 1, escenario[1].Length - 1);
-            foreach (var item in casillas)
-            {                
-                escenario[item.Y][item.X] = item;
+
+            if (!comprobarRotar(escenario))
+            {
+                contador = 0;
+                for (int i = 0; i < casillas.Length; i++)
+                {                    
+                    casillas[i].X = posInicial[contador].X;
+                    casillas[i].Y = posInicial[contador].Y;
+                    contador++;                    
+                }
+
             }
 
-            Console.WriteLine(contador);
-            
+
+            foreach (var item in casillas)
+            {
+                escenario[item.Y][item.X] = item;
+            }
 
         }
 
@@ -315,6 +331,71 @@ namespace Tetris_VersionChingona
                 if (opcionX == 1) moverIzquierda();
                 else moverDerecha();
             }
+        }
+
+        public bool comprobarRotar(Casilla[][] escenario)
+        {
+            Console.WriteLine("y inicial = " + medio.Y + ", x inicial = " + medio.X);
+            if (comprobarEstado(escenario)) return true; 
+
+            moverDerecha();
+
+            if (comprobarEstado(escenario)) return true; 
+
+            moverIzquierda();
+            moverIzquierda();
+
+            if (comprobarEstado(escenario)) return true; 
+
+            moverDerecha();
+            subir();
+
+            if (comprobarEstado(escenario)) return true; 
+
+            moverDerecha();
+
+            if (comprobarEstado(escenario)) return true; 
+
+            moverIzquierda();
+            moverIzquierda();
+
+            if (comprobarEstado(escenario)) return true; 
+
+            moverDerecha();
+            bajar();
+            bajar();
+
+            if (comprobarEstado(escenario)) return true; 
+
+            moverDerecha();
+
+            if (comprobarEstado(escenario)) return true; 
+
+            moverIzquierda();
+            moverIzquierda();
+
+            if (comprobarEstado(escenario)) return true;
+
+            moverDerecha();
+            subir();
+            Console.WriteLine("y final = " + medio.Y + ", x final = " + medio.X);
+            return false;
+        }
+
+        public bool comprobarEstado(Casilla[][] escenario)
+        {
+            int contador = 0;
+
+            try
+            {
+                foreach (var item in casillas)
+                {
+                    if (!escenario[item.Y][item.X].Ocupado) contador++;
+                }
+            }
+            catch (Exception) { return false; }
+            if (contador == 4) return true;
+            else return false;
         }
 
         public void bajar()
