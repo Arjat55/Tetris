@@ -9,10 +9,16 @@ namespace Tetris_VersionChingona
     internal class Escenario
     {
         private Casilla[][] escenario;
+        private Casilla[][] next;
+        private Casilla[][] hold;
         private Pieza piezaActual;
+        private Pieza[] piezasSiguientes = new Pieza[3];
         private int[] filasQuitar;
         private int alto;
         private int ancho;
+        private bool perder = false;
+
+        public bool Perder { get => perder; set => perder = value; }
 
         //cazzo putanna
 
@@ -33,6 +39,18 @@ namespace Tetris_VersionChingona
                     escenario[i][j] = new Casilla(j, i);
                 }
             }
+
+            next = new Casilla[8][];
+
+            for (int i = next.Length - 1; i >= 0; i--)
+            {
+                next[i] = new Casilla[5];
+
+                for (int j = next[i].Length - 1; j >= 0; j--)
+                {
+                    next[i][j] = new Casilla(j, i);
+                }
+            }
         }
 
         public void mostrarEscenario()
@@ -45,14 +63,24 @@ namespace Tetris_VersionChingona
                     escenario[i][j].imprimirCasilla();//Console.Write(escenario[i][j]);
                 }
                 Console.Write("|");
+
+                if (i <= next.Length)
+                {
+                    if (i == next.Length) Console.Write("\t\tNEXT");
+                    else
+                    {
+                        Console.Write("\t|");
+                        for (int j = 0; j < next[i].Length; j++) next[i][j].imprimirCasilla();
+                        Console.Write("|");
+                    }
+                }
+
                 Console.WriteLine();
             }
 
 
-            for (int i = 0; i < escenario.Length; i++)
-            {
-                Console.Write("_");
-            }
+            for (int i = 0; i < escenario.Length; i++) Console.Write("_");
+            
             Console.WriteLine();
         }
 
@@ -60,9 +88,68 @@ namespace Tetris_VersionChingona
         public void generarPieza()
         {
             Random random = new Random();
+            Console.WriteLine(piezaActual == null);
+            if (piezaActual == null)
+            {
+                piezaActual = new Pieza(random.Next(7));
 
-            piezaActual = new Pieza(random.Next(7)/*4*/);
-            piezaActual.generarPieza(escenario);
+                piezasSiguientes[0] = new Pieza(random.Next(7));
+                piezasSiguientes[1] = new Pieza(random.Next(7));
+                piezasSiguientes[2] = new Pieza(random.Next(7));
+
+                Console.WriteLine(piezaActual.TipoPieza1 + " " + piezasSiguientes[0].TipoPieza1 + " " + piezasSiguientes[1].TipoPieza1 + " " + piezasSiguientes[2].TipoPieza1);
+
+                piezaActual.generarPieza(
+                    piezasSiguientes[0].TipoPieza1,
+                    next,
+                    0);
+
+                piezaActual.generarPieza(
+                    piezasSiguientes[1].TipoPieza1,
+                    next,
+                    1);
+
+                piezaActual.generarPieza(
+                    piezasSiguientes[2].TipoPieza1,
+                    next,
+                    2);
+            }
+            else
+            {
+                piezaActual = new Pieza(piezasSiguientes[0].TipoPieza1);
+
+                piezasSiguientes[0] = new Pieza(piezasSiguientes[1].TipoPieza1);
+                piezasSiguientes[1] = new Pieza(piezasSiguientes[2].TipoPieza1);
+                piezasSiguientes[2] = new Pieza(random.Next(7));
+
+                Casilla[] fila1 = next[next.Length - 1];
+                Casilla[] fila2 = next[next.Length - 2];
+
+                foreach (var item in fila1) item.Pieza = false;
+                foreach (var item in fila2) item.Pieza = false;
+
+                next[next.Length - 1] = new Casilla[5];
+                next[next.Length - 1] = next[next.Length - 4];
+                next[next.Length - 2] = new Casilla[5];
+                next[next.Length - 2] = next[next.Length - 5];
+
+                next[next.Length - 4] = new Casilla[5];
+                next[next.Length - 4] = next[next.Length - 7];
+                next[next.Length - 5] = new Casilla[5];
+                next[next.Length - 5] = next[next.Length - 8];
+
+                next[next.Length - 7] = new Casilla[5];
+                next[next.Length - 7] = fila1;
+                next[next.Length - 8] = new Casilla[5];
+                next[next.Length - 8] = fila2;
+
+                piezaActual.generarPieza(
+                    piezasSiguientes[2].TipoPieza1,
+                    next,
+                    2);
+            }            
+
+            perder = !piezaActual.generarPieza(escenario);
         }
         
 
@@ -116,6 +203,7 @@ namespace Tetris_VersionChingona
             if (input == ConsoleKey.Spacebar)
             {
                 while (comprobarCaer()) caer();
+                fijarPieza();
                 return;
             }
 

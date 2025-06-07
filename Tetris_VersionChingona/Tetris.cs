@@ -1,12 +1,10 @@
-﻿using Pastel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Pastel;
 using System.Drawing;
 
 namespace Tetris_VersionChingona
@@ -69,12 +67,13 @@ namespace Tetris_VersionChingona
             }*/
             
             escenario.generarPieza();
-            while (true)
+            while (!escenario.Perder)
             {
                 Console.Clear();
 
                 escenario.mostrarEscenario();
 
+                Console.WriteLine(escenario.Perder);
                 Console.WriteLine(escenario.comprobarCaer());
 
                 //Console.WriteLine($"{"Juan pedro".Pastel(Color.FromArgb(165, 229, 250))}");
@@ -109,6 +108,10 @@ namespace Tetris_VersionChingona
                             escenario.caer();
                             velocidad = 500;
                         }
+                        else
+                        {
+                            escenario.fijarPieza();
+                        }
                     }
                     else if (escenario.comprobarMover(input)) escenario.moverPieza(input);
                     
@@ -118,6 +121,9 @@ namespace Tetris_VersionChingona
 
                 //Thread.Sleep(500);
             }
+            Console.Clear();
+            escenario.mostrarEscenario();
+            Console.WriteLine("HAS PERDIDO");
         }
 
         //BORRAR 
@@ -194,7 +200,6 @@ namespace Tetris_VersionChingona
 
             if (inputLeido) velocidad -= (int)cronometro.ElapsedMilliseconds;
             else velocidad = 500;
-
 
             cronometro.Stop();
         }

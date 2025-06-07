@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,45 +20,44 @@ namespace Tetris_VersionChingona
 
 
         internal Casilla[] Casillas { get => casillas; set => casillas = value; }
-
+        internal TipoPieza TipoPieza1 { get => tipoPieza; set => tipoPieza = value; }
 
         public Pieza(int pieza) //Pieza bien chingona ésta de aquí
         {
             switch (pieza)
             {
-                case 0:
-                    tipoPieza = TipoPieza.Z; //Alv que pieza mas chingona la Z
+                case 0: tipoPieza = TipoPieza.Z; //Alv que pieza mas chingona la Z
                     break;
 
-                case 1:
-                    tipoPieza = TipoPieza.Z_INVERTIDA; //Esta no es tan chingona está _INVERTIDA
+                case 1: tipoPieza = TipoPieza.Z_INVERTIDA; //Esta no es tan chingona está _INVERTIDA
                     break;
 
-                case 2:
-                    tipoPieza = TipoPieza.L;
+                case 2: tipoPieza = TipoPieza.L;
                     break;
 
-                case 3:
-                    tipoPieza = TipoPieza.L_INVERTIDA;
+                case 3: tipoPieza = TipoPieza.L_INVERTIDA;
                     break;
 
-                case 4:
-                    tipoPieza = TipoPieza.T;
+                case 4: tipoPieza = TipoPieza.T;
                     break;
 
-                case 5:
-                    tipoPieza = TipoPieza.CUBO; //Vaya mierda la pelicula del minecraft
+                case 5: tipoPieza = TipoPieza.CUBO; //Vaya mierda la pelicula del minecraft
                     break;
 
-                case 6:
-                    tipoPieza = TipoPieza.I;
+                case 6: tipoPieza = TipoPieza.I;
                     break;
             }
         }
 
-
-        public void generarPieza(Casilla[][] escenario) //Bro realmente hizo un método GenerarPieza() 💀💀💀
+        public Pieza(TipoPieza tipoPieza)
         {
+            this.tipoPieza = tipoPieza;
+        }
+
+
+        public bool generarPieza(Casilla[][] escenario) //Bro realmente hizo un método GenerarPieza() 💀💀💀
+        {
+            bool perder = true;
             ConsoleColor color = ConsoleColor.White;
             altura = escenario.Length - 1;
             mitadX = (escenario[0].Length / 2) - 1; 
@@ -160,11 +161,121 @@ namespace Tetris_VersionChingona
 
             foreach (var item in casillas)
             {
+                if (item.Ocupado) perder = false;
                 item.Pieza = true;
                 item.Color = color;
+            }            
+            return perder;
+        }
+        
+        public void generarPieza(TipoPieza tipo, Casilla[][] siguientes, int pos)
+        {
+            int alturaS = 0;
+            int mitadS = (siguientes[0].Length / 2)/* - 1*/;
+            Casilla[] casillasS = new Casilla[4];
+            ConsoleColor colorS = ConsoleColor.White;
+
+            switch (pos)
+            {
+                case 0:
+                    alturaS = siguientes.Length - 1;
+                    break;
+
+                case 1:
+                    alturaS = siguientes.Length - 4;
+                    break;
+
+                case 2:
+                    alturaS = siguientes.Length - 7;
+                    break;
+            }
+            Console.WriteLine(alturaS + " " + mitadS);
+            switch (tipo)
+            {
+                case TipoPieza.L:
+
+                    casillasS = new[] {
+                        siguientes[alturaS][mitadS + 1],
+                        siguientes[alturaS - 1][mitadS - 1],
+                        siguientes[alturaS - 1][mitadS],
+                        siguientes[alturaS - 1][mitadS + 1]
+                    };                    
+                    colorS = ConsoleColor.DarkYellow;
+                    break;
+
+                case TipoPieza.L_INVERTIDA:
+
+                    casillasS = new[] {
+                        siguientes[alturaS][mitadS - 1],
+                        siguientes[alturaS - 1][mitadS - 1],
+                        siguientes[alturaS - 1][mitadS],
+                        siguientes[alturaS - 1][mitadS + 1],
+                    };                    
+                    colorS = ConsoleColor.Cyan;
+                    break;
+
+                case TipoPieza.Z_INVERTIDA:
+
+                    Console.WriteLine(siguientes[alturaS][mitadS]);
+                    casillasS = new[] {
+                        siguientes[alturaS][mitadS + 1],
+                        siguientes[alturaS][mitadS],
+                        siguientes[alturaS - 1][mitadS],
+                        siguientes[alturaS - 1][mitadS - 1]
+                    };                    
+                    colorS = ConsoleColor.Green;
+                    break;
+                case TipoPieza.Z:
+
+                    casillasS = new[] {
+                        siguientes[alturaS][mitadS - 1],
+                        siguientes[alturaS][mitadS],
+                        siguientes[alturaS - 1][mitadS],
+                        siguientes[alturaS - 1][mitadS + 1]
+                    };                    
+                    colorS = ConsoleColor.Red;
+                    break;
+
+                case TipoPieza.CUBO:
+
+                    casillasS = new[] {
+                        siguientes[alturaS][mitadS ],
+                        siguientes[alturaS][mitadS + 1],
+                        siguientes[alturaS - 1][mitadS],
+                        siguientes[alturaS - 1][mitadS + 1]
+                    };
+                    colorS = ConsoleColor.Yellow;
+                    break;
+
+                case TipoPieza.I:
+
+                    casillasS = new[] {
+                        siguientes[alturaS][mitadS - 1],
+                        siguientes[alturaS][mitadS],
+                        siguientes[alturaS][mitadS + 1],
+                        siguientes[alturaS][mitadS + 2]
+                    };                    
+                    colorS = ConsoleColor.Blue;
+                    break;
+
+                case TipoPieza.T:
+
+                    casillasS = new[] {
+                        siguientes[alturaS - 1][mitadS - 1],
+                        siguientes[alturaS - 1][mitadS],
+                        siguientes[alturaS][mitadS],
+                        siguientes[alturaS - 1][mitadS + 1]
+                    };                    
+                    colorS = ConsoleColor.Magenta;
+                    break;
             }
 
-        }       
+            foreach (var item in casillasS)
+            {
+                item.Pieza = true;
+                item.Color = colorS;
+            }
+        }
 
         public void rotar(Casilla[][] escenario) // métele try catch pa rotar en los bordes yya
         {
