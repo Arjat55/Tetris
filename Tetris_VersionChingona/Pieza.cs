@@ -177,16 +177,13 @@ namespace Tetris_VersionChingona
 
             switch (pos)
             {
-                case 0:
-                    alturaS = siguientes.Length - 1;
+                case 0: alturaS = siguientes.Length - 1;
                     break;
 
-                case 1:
-                    alturaS = siguientes.Length - 4;
+                case 1: alturaS = siguientes.Length - 4;
                     break;
 
-                case 2:
-                    alturaS = siguientes.Length - 7;
+                case 2: alturaS = siguientes.Length - 7;
                     break;
             }
             Console.WriteLine(alturaS + " " + mitadS);

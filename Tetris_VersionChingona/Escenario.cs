@@ -11,6 +11,7 @@ namespace Tetris_VersionChingona
         private Casilla[][] escenario;
         private Casilla[][] next;
         private Casilla[][] hold;
+        private Casilla[] preview = new Casilla[4];
         private Pieza piezaActual;
         private Pieza[] piezasSiguientes = new Pieza[3];
         private int[] filasQuitar;
@@ -57,7 +58,7 @@ namespace Tetris_VersionChingona
         {
             for (int i = escenario.Length - 1; i >= 0; i--)
             {
-                Console.Write("|");
+                Console.Write("\t|");
                 for(int j = 0; j < escenario[i].Length; j++)
                 {
                     escenario[i][j].imprimirCasilla();//Console.Write(escenario[i][j]);
@@ -79,7 +80,7 @@ namespace Tetris_VersionChingona
             }
 
 
-            for (int i = 0; i < escenario.Length; i++) Console.Write("_");
+            for (int i = 0; i < 50; i++) Console.Write("_");
             
             Console.WriteLine();
         }
@@ -147,9 +148,42 @@ namespace Tetris_VersionChingona
                     piezasSiguientes[2].TipoPieza1,
                     next,
                     2);
-            }            
+            }
 
             perder = !piezaActual.generarPieza(escenario);
+
+            generarPreview();
+        }
+
+        public void generarPreview()
+        {
+            if (preview[0] != null) foreach (var casilla in preview) casilla.Pieza = false;
+
+            int bajadas = 0;
+
+            while (comprobarCaer())
+            {
+                piezaActual.bajar();
+                bajadas++;
+            }
+
+            for (int i = 0; i < preview.Length; i++)
+            {
+                int x = piezaActual.Casillas[i].X;
+                int y = piezaActual.Casillas[i].Y;
+                preview[i] = new Casilla(x, y);
+            }
+
+            for (int i = 0; i < bajadas; i++) piezaActual.subir();
+
+            foreach (var casilla in preview)
+            {
+                int x = casilla.X;
+                int y = casilla.Y;
+                casilla.Pieza = true;
+                casilla.Color = ConsoleColor.Gray;
+                if (!piezaActual.Casillas.Contains(escenario[y][x])) escenario[y][x] = casilla;
+            }
         }
         
 
@@ -210,6 +244,7 @@ namespace Tetris_VersionChingona
             if (input == ConsoleKey.UpArrow)
             {
                 girar();
+                generarPreview();
                 return;
             }
 
@@ -252,6 +287,8 @@ namespace Tetris_VersionChingona
                         break;
                 }
             }
+
+            generarPreview();
             
         }
 
