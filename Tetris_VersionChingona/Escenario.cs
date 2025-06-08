@@ -181,7 +181,7 @@ namespace Tetris_VersionChingona
                 int x = casilla.X;
                 int y = casilla.Y;
                 casilla.Pieza = true;
-                casilla.Color = ConsoleColor.Gray;
+                casilla.Color = ConsoleColor.DarkGray;
                 if (!piezaActual.Casillas.Contains(escenario[y][x])) escenario[y][x] = casilla;
             }
         }
