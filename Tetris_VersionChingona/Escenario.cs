@@ -13,11 +13,13 @@ namespace Tetris_VersionChingona
         private Casilla[][] hold;
         private Casilla[] preview = new Casilla[4];
         private Pieza piezaActual;
+        private Pieza piezaHoldeada;
         private Pieza[] piezasSiguientes = new Pieza[3];
         private int[] filasQuitar;
         private int alto;
         private int ancho;
         private bool perder = false;
+        private bool holdUsado = false;
 
         public bool Perder { get => perder; set => perder = value; }
 
@@ -52,6 +54,19 @@ namespace Tetris_VersionChingona
                     next[i][j] = new Casilla(j, i);
                 }
             }
+
+            hold = new Casilla[2][];
+
+            for (int i = hold.Length - 1; i >= 0; i--)
+            {
+                hold[i] = new Casilla[5];
+
+                for (int j = hold[i].Length - 1; j >= 0; j--)
+                {
+                    hold[i][j] = new Casilla(j, i);
+                }
+            }
+
         }
 
         public void mostrarEscenario()
@@ -64,6 +79,21 @@ namespace Tetris_VersionChingona
                     escenario[i][j].imprimirCasilla();//Console.Write(escenario[i][j]);
                 }
                 Console.Write("|");
+
+                if (i == escenario.Length - 2) Console.Write("\t\tHOLD");
+                if (i == escenario.Length - 3) 
+                {
+                    Console.Write("\t|");
+                    foreach (var casilla in hold[1]) casilla.imprimirCasilla();
+                    Console.Write("|");
+                }
+                if (i == escenario.Length - 4)
+                {
+                    Console.Write("\t|");
+                    foreach (var casilla in hold[0]) casilla.imprimirCasilla();
+                    Console.Write("|");
+                }
+                if (i == escenario.Length - 5) Console.Write("\t____________");
 
                 if (i <= next.Length)
                 {
@@ -81,7 +111,7 @@ namespace Tetris_VersionChingona
 
 
             for (int i = 0; i < 50; i++) Console.Write("_");
-            
+
             Console.WriteLine();
         }
 
@@ -212,11 +242,13 @@ namespace Tetris_VersionChingona
                         if (!comprobarCaer()) return false;
                         break;
 
-                    case ConsoleKey.Spacebar:
-                        return true;
+                    case ConsoleKey.Spacebar: return true;
 
-                    case ConsoleKey.UpArrow:
-                        return true;
+                    case ConsoleKey.UpArrow: return true;
+
+                    case ConsoleKey.C: 
+                        if (holdUsado) return false;
+                        break;
 
                     default:
                         return false;
@@ -247,6 +279,8 @@ namespace Tetris_VersionChingona
                 generarPreview();
                 return;
             }
+
+            if (input == ConsoleKey.C) holdear();
 
             foreach (var casPieza in piezaActual.Casillas)
             {
@@ -300,6 +334,8 @@ namespace Tetris_VersionChingona
                 casPieza.Ocupado = true;
                 casPieza.Pieza = false;
             }
+
+            holdUsado = false;
         }
 
 
@@ -343,59 +379,6 @@ namespace Tetris_VersionChingona
                 casPieza.Y--;
             }
         }
-
-
-        /*
-        /// <summary>
-        /// Devuelve un array con las posiciones de las filas que hay que eliminar
-        /// </summary>
-        public int[] comprobarLinea()
-        {
-            int ancho = escenario[0].Length;
-            int contador = 0;
-            int numFilas = 0;
-            int pos = 0;
-
-            foreach (var item in escenario)
-            {
-                
-                foreach (var item1 in item)
-                {
-                    if (item1.Ocupado) contador++;                    
-                }
-
-                if (contador == ancho) numFilas++;
-
-                contador = 0;
-            }
-
-
-
-            if (numFilas == 0) return new int[0];
-            
-            int[] filas = new int[numFilas];
-
-
-
-
-            for (int i = 0; i < escenario.Length; i++)
-            {
-
-                for (int j = 0; j < escenario[i].Length; j++)
-                {
-                    if (escenario[i][j].Ocupado) contador++;
-                }
-
-                if (contador == ancho) filas[pos] = i;                 
-
-                contador = 0;
-            }
-
-            filasQuitar = filas;
-
-            return filas;
-        }*/
-
 
         /// <summary>
         /// Devuelve un array con las posiciones de las filas que hay que eliminar
@@ -478,6 +461,45 @@ namespace Tetris_VersionChingona
                 escenario[escenario.Length - 1] = fila;
                 contador++;
             }
+        }
+
+        public void holdear()
+        {
+            if (piezaHoldeada == null)
+            {
+                piezaHoldeada = new Pieza(piezaActual.TipoPieza1);
+
+                piezaActual.generarPieza(
+                    piezaActual.TipoPieza1,
+                    hold,
+                    0);
+
+                piezaActual.desaparecer();
+
+                generarPieza();
+            }
+            else
+            {
+                piezaActual.desaparecer();
+
+                Pieza pieza = new Pieza(piezaActual.TipoPieza1);
+
+                piezaActual = new Pieza(piezaHoldeada.TipoPieza1);
+
+                piezaHoldeada = pieza;
+
+                foreach (var casilla in hold[0]) casilla.Pieza = false;
+                foreach (var casilla in hold[1]) casilla.Pieza = false;
+
+                piezaActual.generarPieza(
+                    piezaHoldeada.TipoPieza1,
+                    hold,
+                    0);
+
+                piezaActual.generarPieza(escenario);
+            }
+
+            holdUsado = true;
         }
 
         public void girar()

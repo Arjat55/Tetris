@@ -538,6 +538,11 @@ namespace Tetris_VersionChingona
             }
         }
 
+        public void desaparecer()
+        {
+            foreach (var casilla in casillas) casilla.Pieza = false;
+        }
+
 
         public enum TipoPieza //Bro hizo el enum en minuscula 💀💀💀🤣🤣🤣😭😭😭
         {
