@@ -67,6 +67,10 @@
   <ItemGroup>
     <Compile Include="Casilla.cs" />
     <Compile Include="Escenario.cs" />
+    <Compile Include="FileManagerClass\Binary.cs" />
+    <Compile Include="FileManagerClass\Character.cs" />
+    <Compile Include="FileManagerClass\Csv.cs" />
+    <Compile Include="FileManagerClass\FileManager.cs" />
     <Compile Include="Pieza.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using FileManager_v2.FileManagerClass;
+using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Drawing;
 
 namespace Tetris_VersionChingona
 {
@@ -13,9 +9,13 @@ namespace Tetris_VersionChingona
     {
         private Escenario escenario;
         private ConsoleKey input;
+        private Thread t;
         private bool inputLeido = false;
         private int velocidad = 500;
-
+        private int puntuacion = 0;
+        int[] puntuaciones = new int[10];
+        private string[] lineasFile = new string[10];
+        private Character puntuacionesFile = new Character(@"puntuaciones.txt");
 
         internal Escenario Escenario { get => escenario; set => escenario = value; }
 
@@ -25,56 +25,66 @@ namespace Tetris_VersionChingona
         public Tetris() //Que tetris mas chingon
         {
             escenario = new Escenario();
+
+            for (int i = lineasFile.Length - 1; i >= 0; i--) lineasFile[i] = puntuacionesFile.leerLinea();
+
+            for (int i = puntuaciones.Length - 1; i >= 0; i--) puntuaciones[i] = int.Parse(lineasFile[i].Substring(0, (lineasFile[i]).IndexOf(' ')));
+
+            puntuacionesFile.reabrir();
         }
 
-        public void jugarThread() //Bro realmente llamó jugarThread al método.
+        public void iniciar()
         {
-            escenario.generarPieza();
-            while (true)
-            {
-                Console.Clear();
-                escenario.mostrarEscenario();
-                if (escenario.comprobarCaer())
-                {
-                    escenario.caer();
-                }
-                else
-                {
-                    escenario.fijarPieza();
-                    escenario.generarPieza();
-                }
+            mostrarPuntuaciones();
 
-                if (escenario.comprobarLinea().Length != 0)
+            Console.WriteLine("Pulsa cualquier tecla para jugar: ");
+            Console.ReadKey();
+
+            jugar();
+
+            while (!inputLeido) { }
+
+            t.Abort();
+
+            if (comprobarPuntuacion())
+            {
+                Console.WriteLine("Tu puntuación está dentro del top 10, quieres registrar tu puntuación? (s/n): ");
+                ConsoleKey decision = Console.ReadKey(true).Key;
+                
+                if (decision.Equals(ConsoleKey.S))
                 {
-                    escenario.quitarFilas();
+                    Console.WriteLine("Introduce tu nombre: ");
+
+                    string nombre = Console.ReadLine();
+
+                    foreach (var item in getPosiciones()) lineasFile[item] = puntuacion + " " + nombre;
+
+                    puntuacionesFile.borrarArchivo();
+
+                    for (int i = lineasFile.Length - 1; i >= 0; i--) puntuacionesFile.EscribirLinea(lineasFile[i]);
+
+                    mostrarPuntuaciones();
+
+                    puntuacionesFile.cerrar();
                 }
-                Thread.Sleep(1000);
             }
         }
 
-        //HACER MENOS PERUANO
         /// <summary>
         /// Método para iniciar el juego
         /// </summary>
         public void jugar()
         {
-            /*while (true)
-            {
-                Thread thread = new Thread(jugarThread);
-                thread.Start();
-                input = Console.ReadKey().Key;
-                if (escenario.comprobarMover(input)) escenario.moverPieza(input);
-            }*/
-            
+            t = new Thread(leerInput);
+            t.Start();
+
             escenario.generarPieza();
             while (!escenario.Perder)
             {
                 Console.Clear();
 
                 escenario.mostrarEscenario();
-
-                Console.WriteLine(escenario.Perder);
-                Console.WriteLine(escenario.comprobarCaer());
+                Console.WriteLine("Puntuación: " + puntuacion);
 
                 //Console.WriteLine($"{"Juan pedro".Pastel(Color.FromArgb(165, 229, 250))}");
 
@@ -82,7 +92,7 @@ namespace Tetris_VersionChingona
 
                 Console.WriteLine(input);
 
-                if (!inputLeido) 
+                if (!inputLeido)
                 {
                     if (escenario.comprobarCaer())
                     {
@@ -92,11 +102,17 @@ namespace Tetris_VersionChingona
                     else
                     {
                         escenario.fijarPieza();
+
+                        puntuacion += 32;
+
                         escenario.generarPieza();
-                        if (escenario.comprobarLinea().Length != 0)
+
+                        int numFilas = 0;
+                        if ((numFilas = escenario.comprobarLinea().Length) != 0)
                         {
                             escenario.quitarFilas();
-                        }                        
+                            puntuacion += (200 * numFilas);
+                        }
                     }
                 }
                 else
@@ -111,73 +127,44 @@ namespace Tetris_VersionChingona
                         else
                         {
                             escenario.fijarPieza();
+                            puntuacion += 32;
+
+                            int numFilas = 0;
+                            if ((numFilas = escenario.comprobarLinea().Length) != 0)
+                            {
+                                escenario.quitarFilas();
+                                puntuacion += (200 * numFilas);
+                            }
                         }
                     }
                     else if (escenario.comprobarMover(input)) escenario.moverPieza(input);
-                    
+
                 }
-                inputLeido = false;                                                       
-                
+                inputLeido = false;
+
 
                 //Thread.Sleep(500);
             }
             Console.Clear();
             escenario.mostrarEscenario();
-            Console.WriteLine("HAS PERDIDO");
+            Console.WriteLine("HAS PERDIDO  puntuación: " + puntuacion);
+            //t.Abort();
+
+            inputLeido = false;
+
+            Console.WriteLine("Pulsa cualquier tecla para continuar: ");
         }
-
-        //BORRAR 
-        public void jugarPrueba()
-        {
-            escenario.generarPieza();
-            while (true)
-            {
-                Console.Clear();
-
-                escenario.mostrarEscenario();
-
-                Console.WriteLine(escenario.comprobarCaer());
-
-
-                input = Console.ReadKey().Key;
-
-                if (input != ConsoleKey.S && input != ConsoleKey.DownArrow)
-                {
-                    if (escenario.comprobarMover(input))
-                    {
-                        escenario.moverPieza(input);
-                    }
-                }
-                else
-                {
-                    if (escenario.comprobarCaer())
-                    {
-                        escenario.caer();
-                    }
-                    else
-                    {
-                        if (escenario.comprobarLinea().Length != 0)
-                        {
-                            escenario.quitarFilas();
-                        }
-                        escenario.fijarPieza();
-                        escenario.generarPieza();
-                    }
-
-                }
-
-                //Thread.Sleep(500);
-            }
-        }
-
 
         /// <summary>
         /// 
         /// </summary>
         public void leerInput()
         {
-            input = Console.ReadKey().Key;
-            inputLeido = true;
+            while (!escenario.Perder)
+            {
+                input = Console.ReadKey(true).Key;
+                inputLeido = true;
+            }
         }
 
         /// <summary>
@@ -191,12 +178,12 @@ namespace Tetris_VersionChingona
             Stopwatch cronometro = new Stopwatch();
 
             cronometro.Start();
-            
-            Thread t = new Thread(leerInput);
 
-            t.Start();
+            while (cronometro.ElapsedMilliseconds < mili && !inputLeido) { }
 
-            while (cronometro.ElapsedMilliseconds < mili && !inputLeido) { Thread.Sleep(1); }
+            //t.Abort(true);
+
+            Console.WriteLine((int)cronometro.ElapsedMilliseconds);
 
             if (inputLeido) velocidad -= (int)cronometro.ElapsedMilliseconds;
             else velocidad = 500;
@@ -205,10 +192,46 @@ namespace Tetris_VersionChingona
         }
 
 
-        public void mostrarEscenario()
+        public void mostrarPuntuaciones()
         {
-            escenario.mostrarEscenario();
+            Console.WriteLine("PUNTUACIONES: ");
+
+            puntuacionesFile.reabrir();
+
+            for (int i = puntuaciones.Length - 1; i >= 0; i--)
+            {
+                Console.WriteLine(puntuaciones.Length - i + ". " + puntuaciones[i] + " puntos hechos por " + puntuacionesFile.leerLinea().Substring((lineasFile[i]).IndexOf(' ') + 1));
+            }
         }
 
+        public bool comprobarPuntuacion()
+        {
+            foreach (var item in puntuaciones) if (puntuacion >= item) return true;
+
+            return false;
+        }
+
+        public int[] getPosiciones()
+        {
+            int contador = 0;
+
+            foreach (var item in puntuaciones) if (puntuacion >= item) contador++;
+
+            int[] posiciones = new int[contador];
+
+            contador = 0;
+
+            for (int i = puntuaciones.Length - 1; i >= 0; i--)
+            {
+                if (puntuacion >= puntuaciones[i])
+                {
+                    posiciones[contador] = i;
+
+                    contador++;
+                }
+            }
+
+            return posiciones;
+        }
     }
 }
